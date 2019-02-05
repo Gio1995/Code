@@ -1,0 +1,24 @@
+{
+  "name": "hello_world",
+  "version": "0.5.0",
+  "description": "Code HTML in real time",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "electron-toolkit": "electron ./node_modules/electron-toolkit",
+    "package-linux": "electron-packager .  Code --overwrite --electron-version=4.0.3 --asar --platform=linux --arch=x64 --icon=assets/icons/png/1024x1024.png --prune=true --out=release-builds"
+  },
+  "author": "Giovanni",
+  "license": "ISC",
+  "dependencies": {
+    "jquery": "^3.3.1",
+    "nedb": "^1.8.0",
+    "npm": "^6.7.0"
+  },
+  "devDependencies": {
+    "dist": "^0.1.2",
+    "electron-builder": "^20.38.5",
+    "electron-packager": "^13.0.1",
+    "electron-toolkit": "^1.0.24"
+  }
+}

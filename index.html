@@ -1,0 +1,134 @@
+<html>
+	<head>
+		<title>Note</title>
+		<link rel="stylesheet" href="./style/index_style.css">
+		<script src='./script/menu_handler.js'></script>
+	</head>
+	<body>
+		<script>
+			$(document).ready(function(){
+				const {remote} = require('electron');
+				const fs = require("fs");
+				const {dialog} = require("electron").remote;
+
+				var open = false;
+				var file = undefined;
+
+				var window = remote.getCurrentWindow();
+				var count = 0;
+
+				$('#close').on('click', function(){
+    				window.close();
+				});
+
+				$('#minimize').on('click', function(){
+    				window.minimize();
+				});
+
+				$(document).delegate('#text', 'keydown', function(e) {
+  					var keyCode = e.keyCode || e.which;
+
+  					if (keyCode == 9) {
+    					e.preventDefault();
+    					var start = this.selectionStart;
+    					var end = this.selectionEnd;
+
+    					// set textarea value to: text before caret + tab + text after caret
+    					$(this).val($(this).val().substring(0, start)
+                		+ "\t"
+                		+ $(this).val().substring(end));
+
+    					// put caret at right position again
+    					this.selectionStart =
+    					this.selectionEnd = start + 1;
+  					}
+				});
+
+				$('#text').on('input', function(){
+					var text = $('#text').val();
+					$('#page').contents().find('body').html(text);
+					count = text.length;
+					$('#count').text('#Characters: ' + count);
+				});
+
+				document.getElementById('button_create_file').addEventListener("click", () =>{
+					var text = $('#text').val();
+
+					if(open == false){
+						dialog.showSaveDialog((filename) =>{
+							file = String(filename);
+							if(filename === undefined){
+								console.log("The file isn't created: ");
+								return;
+							}else{
+								document.getElementById('title').innerHTML = filename + " - Code";
+							}
+
+							fs.writeFile(filename, text, (err) => {
+								if(err){
+									console.log("An error ocured with the creation of file " +err.message);
+									return;
+								}
+								open = true;
+							});
+
+							alert("File succesfully created");
+						});
+					}else{
+						fs.writeFile(file, text, (err) => {
+								if(err){
+									console.log("An error ocured with the creation of file " +err.message);
+									return;
+								}
+								open = true;
+							});
+
+							alert("File succesfully updated");
+					}
+
+				}, false);
+
+				document.getElementById('button_open_file').addEventListener("click", () => {
+					filename = undefined;
+					dialog.showOpenDialog((filename) => {
+						file = String(filename);
+						if(filename === undefined){
+							console.log("No file selected");
+							return;
+						}
+
+						fs.readFile(filename[0], "utf-8", (err, data) => {
+							if(err){
+								console.log("Error open file");
+								return;
+							}
+
+							console.log("The content is: " + data);
+
+							document.getElementById('text').innerHTML = data;
+							$('#page').contents().find('body').html(data);
+							document.getElementById('title').innerHTML = filename + " - Code";
+
+							count = data.length;
+							$('#count').text('#Characters: ' + count);
+							open = true;
+						});
+					});
+				}, false);
+
+			});
+		</script>
+		<div id='navbar'>
+			<div id='close'></div>
+			<div id='minimize'></div>
+			<div id='nav'>
+				<h1 id='title'>Untitiled - Code</h1>
+				<input type="button" id='button_create_file' value="Save"/>
+				<input type="button" id='button_open_file' value="Open"/>
+			</div>
+		</div>
+		<textarea name="textarea" id="text" cols="30" rows="10"></textarea>
+		<iframe id='page'></iframe>
+		<div id='count'>Character: 0</div>
+	</body>
+</html>
